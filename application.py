@@ -30,6 +30,23 @@ piHost = '192.168.43.196'  # ip of the pi
 ftpServerAccount: str = 'pi'
 ftpServerPassword: str = 'raspberry'
 
+def ftpGetFile():
+    ftp = FTP(piHost)   # create the ftp object with the ip of the pi
+    ftp.login(ftpServerAccount, ftpServerPassword)  # login pi 
+    ftp.cwd('/files')   # change dir /pi/ftp/files - only have permission in /files
+    ftp.dir()   # displays the dir on python console
+    with open ('data.txt', 'wb') as fp:
+        # fetches the file from pi and save it as "data.txt" locally
+        ftp.retrbinary('RETR ' + 'data.txt', fp.write)
+        with open('data.txt') as csv_file:
+            # parses the data from "data.txt"
+            temp = []   # generates a new array every loop
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            for row in csv_reader:
+                for item in row:
+                    temp.append(item)   # stores item in data.txt into array temp
+    return temp # return the appended array
+
 
 def sendDataWeb():
     """
@@ -39,27 +56,15 @@ def sendDataWeb():
     while not thread_stop_event.isSet():
         # opens the connection
         # all upload/download should be made within this with statement
-        ftp = FTP(piHost)   # create the ftp object with the ip of the pi
-        ftp.login(ftpServerAccount, ftpServerPassword)  # login pi 
-        ftp.cwd('/files')   # change dir /pi/ftp/files - only have permission in /files
-        ftp.dir()   # displays the dir on python console
-        with open ('data.txt', 'wb') as fp:
-            # fetches the file from pi and save it as "data.txt" locally
-            ftp.retrbinary('RETR ' + 'data.txt', fp.write)
-        with open('data.txt') as csv_file:
-            # parses the data from "data.txt"
-            temp = []   # generates a new array every loop
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            for row in csv_reader:
-                for item in row:
-                    temp.append(item)   # stores item in data.txt into array temp
-            number1 = temp[0]   # temporary
-            number2 = temp[1]
-            # TODO: reorginize data as nested arrays
-            # print(temp)
+        # ftpGetFile()
+        number = '0'   # temporary
+        my_value = '1'
+        # TODO: reorginize data as nested arrays
+        # print(temp)
 
         # TODO: send multiply "strands" of data with different keys 
-        socketio.emit('newnumber', {'number': "Machine1: "+ number1 + " Machine2:"+ number2}, namespace='/test')
+        socketio.emit('newnumber', {'number': number}, namespace='/test')
+        socketio.emit('testnumber', {'testnumber' : my_value}, namespace='/test')
         socketio.sleep(1)   # wait 1 sec
 
 
