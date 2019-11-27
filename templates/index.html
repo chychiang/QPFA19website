@@ -6,6 +6,12 @@
     <script src="static/js/application.js"></script>
 
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        table, th, td {
+          border: 1px solid black;
+          padding: 10px;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -20,13 +26,22 @@
 
 <div class="container" id="content">
     <div class="row">
-        <p>Your machine is here: </p>
-        <h3>Number list:</h3>
-        <div id="log">
-        </div> <!-- /#log -->
+      <h2>Here</h2>
+        <table>
+          <tr>
+            <th>Machine #</th>
+            <th>Availiability</th>
+          </tr>
+          <tr>
+            <td>Machine 1</td>
+            <td><div id="log"></div></td> 
+          <tr>
+          <tr>
+            <td>Machine 2</td>
+            <td><div id='log2'></div></td>
+          </tr>
+        </table>
     </div>
 </div>
-
-
 </body>
 </html>
