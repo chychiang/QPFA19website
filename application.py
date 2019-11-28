@@ -38,13 +38,14 @@ def ftpGetFile():
     with open ('data.txt', 'wb') as fp:
         # fetches the file from pi and save it as "data.txt" locally
         ftp.retrbinary('RETR ' + 'data.txt', fp.write)
-        with open('data.txt') as csv_file:
-            # parses the data from "data.txt"
-            temp = []   # generates a new array every loop
-            csv_reader = csv.reader(csv_file, delimiter=',')
-            for row in csv_reader:
-                for item in row:
-                    temp.append(item)   # stores item in data.txt into array temp
+    with open('data.txt') as csv_file:
+        # parses the data from "data.txt"
+        temp = []   # generates a new array every loop
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for row in csv_reader:
+            for item in row:
+                print(item)
+                temp.append(item)   # stores item in data.txt into array 
     return temp # return the appended array
 
 
@@ -56,12 +57,13 @@ def sendDataWeb():
     while not thread_stop_event.isSet():
         # opens the connection
         # all upload/download should be made within this with statement
-        # ftpGetFile()
-        number = '0'   # temporary
-        my_value = '1'
-        # TODO: reorginize data as nested arrays
-        # print(temp)
+        '''temp = ftpGetFile()
+        number = str(temp[0])   # temporary
+        my_value = str(temp[1])'''
 
+        number = 'on'
+        my_value = 'off'
+        # TODO: reorginize data as nested 
         # TODO: send multiply "strands" of data with different keys 
         socketio.emit('newnumber', {'number': number}, namespace='/test')
         socketio.emit('testnumber', {'testnumber' : my_value}, namespace='/test')
