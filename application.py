@@ -28,7 +28,7 @@ thread_stop_event = Event()
 # ftp config
 piHost = '192.168.43.196'  # ip of the pi
 ftpServerAccount: str = 'pi'
-ftpServerPassword: str = 'raspberry'
+ftpServerPassword: str = 'qp19'
 
 def ftpGetFile():
     ftp = FTP(piHost)   # create the ftp object with the ip of the pi
