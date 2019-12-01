@@ -31,22 +31,30 @@ ftpServerAccount: str = 'pi'
 ftpServerPassword: str = 'qp19'
 
 def ftpGetFile():
-    ftp = FTP(piHost)   # create the ftp object with the ip of the pi
-    ftp.login(ftpServerAccount, ftpServerPassword)  # login pi 
-    ftp.cwd('/files')   # change dir /pi/ftp/files - only have permission in /files
-    ftp.dir()   # displays the dir on python console
-    with open ('data.txt', 'wb') as fp:
-        # fetches the file from pi and save it as "data.txt" locally
-        ftp.retrbinary('RETR ' + 'data.txt', fp.write)
-    with open('data.txt') as csv_file:
-        # parses the data from "data.txt"
-        temp = []   # generates a new array every loop
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        for row in csv_reader:
-            for item in row:
-                print(item)
-                temp.append(item)   # stores item in data.txt into array 
-    return temp # return the appended array
+    
+    try:
+        ftp = FTP(piHost, timeout= 3)   # create the ftp object with the ip of the pi
+        ftp.login(ftpServerAccount, ftpServerPassword)  # login pi 
+        ftp.cwd('/files')   # change dir /pi/ftp/files - only have permission in /files
+        ftp.dir()   # displays the dir on python console
+        with open ('data.txt', 'wb') as fp:
+            # fetches the file from pi and save it as "data.txt" locally
+            ftp.retrbinary('RETR ' + 'data.txt', fp.write)
+    except: 
+        print("FTP error, check connection and config")
+    finally: 
+        print("executing finally")
+        with open('data.txt') as csv_file:
+            # parses the data from "data.txt"
+            data = []   # generates a new array every loop
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            for row in csv_reader:
+                print(row)
+                for item in row:
+                    print(item)
+                    data.append(item)   # stores item in data.txt into array 
+        return data # return the appended array
+    return data
 
 
 def sendDataWeb():
@@ -57,16 +65,13 @@ def sendDataWeb():
     while not thread_stop_event.isSet():
         # opens the connection
         # all upload/download should be made within this with statement
-        '''temp = ftpGetFile()
-        number = str(temp[0])   # temporary
-        my_value = str(temp[1])'''
-
-        number = 'on'
-        my_value = 'off'
+        laundryData = ftpGetFile() # use this for final version
+        # laundryData = [1,0]
+        machine1data = 'on' if laundryData[0] == 1 else 'off'
+        machine2data = 'on' if laundryData[1] == 1 else 'off'
         # TODO: reorginize data as nested 
-        # TODO: send multiply "strands" of data with different keys 
-        socketio.emit('newnumber', {'number': number}, namespace='/test')
-        socketio.emit('testnumber', {'testnumber' : my_value}, namespace='/test')
+        socketio.emit('data1', {'data': machine1data}, namespace='/test')
+        socketio.emit('data2', {'data': machine2data}, namespace='/test')
         socketio.sleep(1)   # wait 1 sec
 
 
