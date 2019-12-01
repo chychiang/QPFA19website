@@ -1,7 +1,6 @@
 # Start with a basic flask app webpage.
 from flask_socketio import SocketIO, emit
 from flask import Flask, render_template, url_for, copy_current_request_context
-from random import random
 from time import sleep
 from threading import Thread, Event
 
@@ -11,9 +10,6 @@ import csv
 # dependencies for ftp to work
 from ftplib import FTP  # documentation: https://docs.python.org/3/library/ftplib.html
 
-
-__author__ = 'slynn'
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 app.config['DEBUG'] = True
@@ -21,7 +17,6 @@ app.config['DEBUG'] = True
 #turn the flask app into a socketio app
 socketio = SocketIO(app, async_mode=None, logger=True, engineio_logger=True)
 
-#random number Generator Thread
 thread = Thread()
 thread_stop_event = Event()
 
@@ -31,7 +26,10 @@ ftpServerAccount: str = 'pi'
 ftpServerPassword: str = 'qp19'
 
 def ftpGetFile():
-    
+    """
+    Attempts to connect to the pi FTP server to retrieve data.
+    Reads existing data, regardless of whether the retrival is successful or not.
+    """
     try:
         ftp = FTP(piHost, timeout= 3)   # create the ftp object with the ip of the pi
         ftp.login(ftpServerAccount, ftpServerPassword)  # login pi 
@@ -43,19 +41,14 @@ def ftpGetFile():
     except: 
         print("FTP error, check connection and config")
     finally: 
-        print("executing finally")
+        # parses data from data.txt as a csv_file (formatted as a csv on pi)
         with open('data.txt') as csv_file:
             # parses the data from "data.txt"
-            data = []   # generates a new array every loop
+            data = []   # refreshes array every loop
             csv_reader = csv.reader(csv_file, delimiter=',')
             for row in csv_reader:
-                print(row)
-                for item in row:
-                    print(item)
-                    data.append(item)   # stores item in data.txt into array 
-        return data # return the appended array
-    return data
-
+                data.append(row)
+                return data # return the appended array
 
 def sendDataWeb():
     """
@@ -63,19 +56,19 @@ def sendDataWeb():
     parses the data using csv reader and emits
     """
     while not thread_stop_event.isSet():
-        # opens the connection
-        # all upload/download should be made within this with statement
-        laundryData = ftpGetFile() # use this for final version
-        # laundryData = [1,0]
-        machine1data = 'on' if laundryData[0] == 1 else 'off'
-        machine2data = 'on' if laundryData[1] == 1 else 'off'
-        # TODO: reorginize data as nested 
+        # main loop
+        laundryData = ftpGetFile() # retrieve data and stores the list in var
+        print(type(laundryData[0][0]))
+        # converts raw data to human readable str
+        # the data is passed in as str, so condition is also str
+        machine1data = 'Unavailable' if laundryData[0][0] == '1' else 'Available'
+        machine2data = 'Unavailable' if laundryData[0][1] == '1' else 'Available'
+        # emits data to clients
         socketio.emit('data1', {'data': machine1data}, namespace='/test')
         socketio.emit('data2', {'data': machine2data}, namespace='/test')
-        socketio.sleep(1)   # wait 1 sec
+        socketio.sleep(1)   # waits 1 sec
 
-
-#ben - these we didn't touch
+#
 @app.route('/')
 def index():
     #only by sending this page first will the client be connected to the socketio instance

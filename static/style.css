@@ -1,8 +1,0 @@
-.grid-container {
-    display: grid;
-    grid-template-columns: auto auto
-    grid-gap: 10px;
-    background-color: blue;
-    padding: 10px;
-}
-

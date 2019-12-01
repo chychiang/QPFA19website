@@ -1,9 +1,7 @@
-
 $(document).ready(function(){
-    //connect to the socket server.
+    //connect to the socket server once the document is ready
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
-    var numbers_received = [];
-
+    
     //retrieve data from server socket
     socket.on('data1', function(msg) {
         console.log("Received data1 " + msg.data);
@@ -18,13 +16,17 @@ $(document).ready(function(){
 });
 
 function colorchanger(socketName, input, htmlElementId) {
-    if (input == 'on') {
+    /*  intuitive visuals of the availability of the laundry machines
+        unavailable machines have red background
+        available machines have green background */
+    if (input == 'Unavailable') {
         document.getElementById(htmlElementId).style.backgroundColor = "rgba(255, 0, 0, 0.5)";
     }
-    else if (input == "off") {
+    else if (input == "Available") {
         document.getElementById(htmlElementId).style.backgroundColor = "rgba(0, 255, 0, 0.5)";
     }
     else {
+        //for debug
         console.log("No data recieved from " + socketName);
     }
 }
