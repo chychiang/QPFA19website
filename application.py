@@ -44,11 +44,11 @@ def ftpGetFile():
         # parses data from data.txt as a csv_file (formatted as a csv on pi)
         with open('data.txt') as csv_file:
             # parses the data from "data.txt"
-            data = []   # refreshes array every loop
+            data = []  # refreshes array every loop
             csv_reader = csv.reader(csv_file, delimiter=',')
             for row in csv_reader:
                 data.append(row)
-                return data # return the appended array
+            return data  # return the appended array
 
 def sendDataWeb():
     """
@@ -58,20 +58,20 @@ def sendDataWeb():
     while not thread_stop_event.isSet():
         # main loop
         laundryData = ftpGetFile() # retrieve data and stores the list in var
-        print(type(laundryData[0][0]))
+        print(laundryData)
         # converts raw data to human readable str
         # the data is passed in as str, so condition is also str
-        machine1data = 'Unavailable' if laundryData[0][0] == '1' else 'Available'
-        machine2data = 'Unavailable' if laundryData[0][1] == '1' else 'Available'
+        machine1data = 'Unavailable' if int(laundryData[0][0]) == 1 else 'Available'
+        machine2data = 'Unavailable' if int(laundryData[0][1]) == 1 else 'Available'
         # emits data to clients
         socketio.emit('data1', {'data': machine1data}, namespace='/test')
         socketio.emit('data2', {'data': machine2data}, namespace='/test')
         socketio.sleep(1)   # waits 1 sec
 
-#
+
 @app.route('/')
 def index():
-    #only by sending this page first will the client be connected to the socketio instance
+    # only by sending this page first will the client be connected to the socketio instance
     return render_template('index.html')
 
 @socketio.on('connect', namespace='/test')
@@ -80,7 +80,6 @@ def test_connect():
     global thread
     print('Client connected')
 
-    #Start the random number generator thread only if the thread has not been started before.
     if not thread.isAlive():
         print("Starting Thread")
         thread = socketio.start_background_task(sendDataWeb)
@@ -88,7 +87,6 @@ def test_connect():
 @socketio.on('disconnect', namespace='/test')
 def test_disconnect():
     print('Client disconnected')
-
 
 if __name__ == '__main__':
     socketio.run(app)
