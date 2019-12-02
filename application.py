@@ -38,6 +38,9 @@ def ftpGetFile():
         with open ('data.txt', 'wb') as fp:
             # fetches the file from pi and save it as "data.txt" locally
             ftp.retrbinary('RETR ' + 'data.txt', fp.write)
+        with open ('data1.txt', 'wb') as fp:
+            # fetches the file from pi and save it as "data.txt" locally
+            ftp.retrbinary('RETR ' + 'data1.txt', fp.write)
     except: 
         print("FTP error, check connection and config")
     finally: 
@@ -58,13 +61,21 @@ def sendDataWeb():
     while not thread_stop_event.isSet():
         # main loop
         laundryData = ftpGetFile() # retrieve data and stores the list in var
-        print(laundryData)
         # converts raw data to human readable str
         # the data is passed in as str, so condition is also str
-        machine1data = 'Unavailable' if int(laundryData[0][0]) == 1 else 'Available'
+        with open('data1.txt') as csv_file:
+            # parses the data from "data.txt"
+            time = []  # refreshes array every loop
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            for row in csv_reader:
+                time.append(row)
+        time1 = time[0][1]
+        machine1data = 'Unavailable' if int(time[0][0]) == 1 else 'Available'
         machine2data = 'Unavailable' if int(laundryData[0][1]) == 1 else 'Available'
+
+
         # emits data to clients
-        socketio.emit('data1', {'data': machine1data}, namespace='/test')
+        socketio.emit('data1', {'data': machine1data, 'time': time1}, namespace='/test')
         socketio.emit('data2', {'data': machine2data}, namespace='/test')
         socketio.sleep(1)   # waits 1 sec
 

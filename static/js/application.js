@@ -7,11 +7,13 @@ $(document).ready(function(){
         console.log("Received data1 " + msg.data);
         colorchanger('data1', msg.data, 'box1')
         $('#log').html(msg.data);
+        $('#time1').html(msg.time);
     });
     socket.on('data2', function(msg){
         console.log("Received data2 " + msg.data)
         colorchanger('data2', msg.data, 'box2')
         $('#log2').html(msg.data)
+        $('#time2').html(msg.time)
     });
 });
 
